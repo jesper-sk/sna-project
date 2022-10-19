@@ -1,4 +1,8 @@
 import networkx as nx
+import ijson
+import json
+from tqdm import tqdm
+
 FILE = "./data/citation.edgelist.txt"
 NETWORKS_FILE = "./data/netscience.gml"
 
@@ -14,7 +18,8 @@ def graph():
 
     return G
 
-def undirected_graph(filename = FILE):
+
+def undirected_graph(filename=FILE):
     if filename == "networks":
         return nx.read_gml(NETWORKS_FILE)
 
@@ -28,3 +33,5 @@ def undirected_graph(filename = FILE):
     G.add_edges_from(edge_data)
 
     return G
+
+
