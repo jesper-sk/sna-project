@@ -10,20 +10,22 @@ GRAPH_FILE = "./data/dblp.gml"
 
 
 def load_from_json(fn=JSON_FILE):
-    file = open(JSON_FILE, 'rb')
-    items = ijson.items(file, 'item')
-    g = nx.DiGraph()
-    venues = {}
+    try:
+        file = open(JSON_FILE, 'rb')
+        items = ijson.items(file, 'item')
+        g = nx.DiGraph()
+        venues = {}
 
-    for item in tqdm(items, desc='Loading graph from ' + fn, total=NODE_COUNT):
-        if 'venue' in item and 'id' in item['venue'] and 'raw' in item['venue']:
-            if item['venue']['id'] not in venues:
-                venues[item['venue']['id']] = item['venue']['raw']
+        for item in tqdm(items, desc='Loading graph from ' + fn, total=NODE_COUNT):
+            if 'venue' in item and 'id' in item['venue'] and 'raw' in item['venue']:
+                if item['venue']['id'] not in venues:
+                    venues[item['venue']['id']] = item['venue']['raw']
 
-        g.add_node(item['id'], v=item.get('venue', {}).get('id', -1))
-        g.add_edges_from([(item['id'], other) for other in item.get('references', [])])
-
-    file.close()
+            g.add_node(item['id'], v=item.get('venue', {}).get('id', -1))
+            g.add_edges_from([(item['id'], other) for other in item.get('references', [])])
+    finally:
+        file.close()
+    
     return G, venues
 
 
