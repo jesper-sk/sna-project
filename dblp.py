@@ -26,7 +26,7 @@ def load_from_json(fn=JSON_FILE):
     finally:
         file.close()
     
-    return G, venues
+    return g, venues
 
 
 def save_venues(v, fn=VENUES_FILE):
