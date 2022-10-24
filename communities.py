@@ -1,4 +1,4 @@
-from graph import undirected_graph
+from old.graph import undirected_graph
 from networkx import find_cliques, bridges
 from networkx.algorithms.community import girvan_newman
 
