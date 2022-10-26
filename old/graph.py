@@ -3,8 +3,6 @@ import ijson
 import json
 from tqdm import tqdm
 
-FILE = "../data/citation.edgelist.txt"
-NETWORKS_FILE = "../data/netscience.gml"
 
 def graph():
     with open(FILE, 'r') as file:

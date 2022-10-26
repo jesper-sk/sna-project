@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 NODE_COUNT = 4894081
 JSON_FILE = "./data/dblp.v12.json"
-VENUES_FILE = "../data/dblp-venues.json"
+VENUES_FILE = "dblp-venues.json"
 GRAPH_FILE = "../data/dblp.gml"
 
 

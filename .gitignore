@@ -1,6 +1,6 @@
 .idea
 /data/dblp*.*
-!/data/dblp-venues.json
+!/old/dblp-venues.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
