@@ -1,10 +1,10 @@
 from typing import Tuple, Dict
 
 import networkx as nx
-from hep_ph import graph, to_arxiv
+from hep_ph import citation_graph, to_arxiv
 
 #%%
-G = graph()
+G = citation_graph()
 
 
 def page_rank(hits: Tuple[Dict[str, float], Dict[str, float]], balance: float = 0.5):
