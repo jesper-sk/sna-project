@@ -26,3 +26,5 @@ big_wcc = max(wccs, key=len)
 big_scc = max(sccs, key=len)
 dens_big_wcc = nx.density(nx.subgraph(G, big_wcc))
 dens_big_scc = nx.density(nx.subgraph(G, big_scc))
+
+
