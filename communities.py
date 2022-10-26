@@ -1,8 +1,9 @@
-from old.graph import undirected_graph
+import itertools
+from hep_ph import coauthorship_graph
 from networkx import find_cliques, bridges
 from networkx.algorithms.community import girvan_newman
 
-G = undirected_graph("networks")
+G = coauthorship_graph()
 print(len(G.nodes()))
 
 #%%
@@ -25,7 +26,7 @@ print("The clique number: ", clique_number)
 no_maximal_cliques = len(cliques)
 print("Number of maximal cliques: ", no_maximal_cliques)
 
-# Homophily analysis
+# Homophily analysis --> TODO
 # 1. Kies een attribute
 
 
@@ -42,4 +43,9 @@ print(bridges(G))
 
 # Partitioning Algorithm: Girvan-Newman
 # Finds communities in a graph using the Girvan–Newman method.
-print(girvan_newman(G))
+k = 4
+comp = girvan_newman(G)
+limited = itertools.takewhile(lambda c: len(c) <= k, comp)
+for communities in limited:
+    print(tuple(sorted(c) for c in communities))
+
