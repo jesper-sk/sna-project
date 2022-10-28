@@ -1,3 +1,5 @@
+from typing import List
+
 import arxiv
 import networkx as nx
 
@@ -16,4 +18,11 @@ def coauthorship_graph(fn: str = COAUTH_FILE):
 
 
 def to_arxiv(node_id: str):
-    return next(arxiv.Search(id_list=[ARXIV_ARCHIVE + node_id]).results())
+    node_id_fmt = f"{int(node_id):07d}"
+    return next(arxiv.Search(id_list=[ARXIV_ARCHIVE + node_id_fmt]).results())
+
+
+def to_arxiv_gen(*node_list: str):
+    return arxiv.Search(
+        id_list=[ARXIV_ARCHIVE + node_id for node_id in node_list]
+    ).results()
