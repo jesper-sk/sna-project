@@ -16,4 +16,4 @@ def coauthorship_graph(fn: str = COAUTH_FILE):
 
 
 def to_arxiv(node_id: str):
-    return next(arxiv.Search(id_list=[ARXIV_ARCHIVE + node_id]).results())
+    return next(arxiv.Search(id_list=[ARXIV_ARCHIVE + f"{int(node_id):07d}"]).results())
