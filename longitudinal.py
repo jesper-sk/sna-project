@@ -6,6 +6,10 @@ import os, time
 from pathlib import Path
 import ijson
 from tqdm import tqdm
+from dateutil.parser import parse
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
+import numpy as np
 
 PUB_DATA_FILE = './data/pub.csv'
 
@@ -53,10 +57,6 @@ def scrape_arxiv_data(graph, wait: int = 3, start_at: int = 0, write_thresh: int
 
         time.sleep(wait)
 
-
-if __name__ == '__main__':
-    scrape_arxiv_data(citation_graph(), 2, 676)
-
 # #%%
 #
 # all = []
@@ -68,3 +68,57 @@ if __name__ == '__main__':
 # relevant = []
 # for entry in all:
 #     id = all
+
+#%%
+
+
+def get_dates():
+    DATE_FILE = './data/cit-HepPh-dates.txt'
+    dates = {}
+    with open(DATE_FILE, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            if line.startswith('#'):
+                continue
+            offset = 2 if line.startswith('11') else 0
+            spl = line.split('\t')
+            id = spl[0][offset:]
+            date = parse(spl[1])
+            dates[id] = date
+    return dates
+#%%
+
+
+g = citation_graph()
+dates = get_dates()
+
+
+#%%
+for node in tqdm(g.nodes):
+    g.add_node(node, date=dates.get(node))
+
+
+#%%
+def get_cit_per_year(g, ppy=4):
+    years = []
+    date = g.nodes['9907233']['date']
+    for neigh in g.predecessors('9907233'):
+        ndate = g.nodes[neigh]['date']
+        if not ndate:
+            continue
+        ts = ndate - date
+        quarters = ts.days // (365 // ppy)
+        years.append(quarters / ppy)
+
+    return [year for year in years if year >= 0]
+
+
+def plot_cit_per_year(years, ppy=4):
+    plt.figure()
+    plt.xlabel("Years since publication")
+    plt.ylabel("Total number of citations")
+    plt.xticks(range(11))
+    plt.yticks(np.arange(0, 6001, 500))
+    plt.hist(years, bins=ppy * 10, align='left')
+    plt.savefig("./img/longitudinal.png")
+    plt.show()
