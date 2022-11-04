@@ -95,20 +95,24 @@ dates = get_dates()
 
 #%%
 for node in tqdm(g.nodes):
-    g.add_node(node, date=dates.get(node))
+    g.add_node(node, date=dates.get(f"{int(node):07d}"))
 
 
 #%%
-def get_cit_per_year(g, ppy=4):
+def get_cit_per_year(g, ids = None, ppy=4):
     years = []
-    date = g.nodes['9907233']['date']
-    for neigh in g.predecessors('9907233'):
-        ndate = g.nodes[neigh]['date']
-        if not ndate:
+    ids = ids or list(g.nodes)
+    for id in ids:
+        date = g.nodes[id]['date']
+        if not date:
             continue
-        ts = ndate - date
-        quarters = ts.days // (365 // ppy)
-        years.append(quarters / ppy)
+        for neigh in g.predecessors(id):
+            ndate = g.nodes[neigh]['date']
+            if not ndate:
+                continue
+            ts = ndate - date
+            quarters = ts.days // (365 // ppy)
+            years.append(quarters / ppy)
 
     return [year for year in years if year >= 0]
 
@@ -118,7 +122,10 @@ def plot_cit_per_year(years, ppy=4):
     plt.xlabel("Years since publication")
     plt.ylabel("Total number of citations")
     plt.xticks(range(11))
-    plt.yticks(np.arange(0, 6001, 500))
-    plt.hist(years, bins=ppy * 10, align='left')
-    plt.savefig("./img/longitudinal.png")
+    plt.yticks(np.arange(0, 9001, 1000))
+    plt.hist(years, bins=int(ppy * 10), linewidth=1, edgecolor='black')
+    plt.savefig("./img/longitudinalt.pdf", bbox_inches='tight', pad_inches=0)
     plt.show()
+
+#%%
+plt.savefig('img/big-pub-citations.pdf', bbox_inches='tight', pad_inches=0)
