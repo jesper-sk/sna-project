@@ -7,7 +7,9 @@ from networkx.algorithms.community import girvan_newman
 from hep_ph import citation_graph
 #%%
 G = citation_graph()
+print(filter())
 SG = nx.subgraph(G, max(nx.strongly_connected_components(G), key=len))
+print(SG)
 #%%
 
 

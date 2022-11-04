@@ -1,22 +1,37 @@
 import itertools
-from hep_ph import coauthorship_graph
+from hep_ph import coauthorship_graph, citation_graph
 from networkx import find_cliques, bridges
+import networkx as nx
 from networkx.algorithms.community import girvan_newman
 
 G = coauthorship_graph()
-print(len(G.nodes()))
+print(len(G.nodes()), len(G.edges()))
+print(nx.average_clustering(G))
+print(nx.density(G))
+
+ccs = list(nx.connected_components(G))
+largest_ccs = max(ccs, key=len)
+print("Length largest cc: ", len(largest_ccs))
+print("Density:", nx.density(G.subgraph(largest_ccs)))
+print("Diameter:", nx.diameter(G.subgraph(largest_ccs)))
 
 #%%
 # Detect the communities of types that were discussed:
 # - Cliques
-# - Homophily analysis
 # - Important nodes acting as Bridges
 # - Partitioning Algorithm: Girvan-Newman
 
 # Cliques
 print("Find cliques")
 cliques = list(find_cliques(G))
-print(cliques)
+
+# Count correspondences between cliques and connected components
+count = 0
+for clique in cliques:
+    c = set(clique)
+    if c in ccs:
+        count += 1
+print("CCs and cliques that are the same:", count)
 
 # The clique number of a graph is the size of the largest clique in the graph.
 clique_number = max([len(c) for c in cliques])
@@ -26,26 +41,6 @@ print("The clique number: ", clique_number)
 no_maximal_cliques = len(cliques)
 print("Number of maximal cliques: ", no_maximal_cliques)
 
-# Homophily analysis --> TODO
-# 1. Kies een attribute
-
-
-# 2. Bereken de fractions of occurrences
-
-
-# 3. Voor ieder paar van mogelijke attribute values, bereken:
-#   3.1 de verwachte 'random' occurrence waarde
-#   3.2 de fraction of edges die van dit type zijn
-
-
 # Bridges
-print(bridges(G))
-
-# Partitioning Algorithm: Girvan-Newman
-# Finds communities in a graph using the Girvan–Newman method.
-k = 4
-comp = girvan_newman(G)
-limited = itertools.takewhile(lambda c: len(c) <= k, comp)
-for communities in limited:
-    print(tuple(sorted(c) for c in communities))
+print("No bridges:", len(list(bridges(G))))
 

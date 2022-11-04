@@ -1,10 +1,8 @@
-#%% Imports
+# %% Imports
 import json
-
 from hep_ph import *
 import os, time
 from pathlib import Path
-import ijson
 from tqdm import tqdm
 from dateutil.parser import parse
 import matplotlib.pyplot as plt
@@ -13,8 +11,8 @@ import numpy as np
 
 PUB_DATA_FILE = './data/pub.csv'
 
-#%%
 
+# %%
 def scrape_arxiv_data(graph, wait: int = 3, start_at: int = 0, write_thresh: int = 15, keep_trying: bool = False):
     waits = [0, 1, 5, 10, 30]
     path = Path(PUB_DATA_FILE)
@@ -57,6 +55,10 @@ def scrape_arxiv_data(graph, wait: int = 3, start_at: int = 0, write_thresh: int
 
         time.sleep(wait)
 
+
+graph = citation_graph()
+scrape_arxiv_data(graph)
+
 # #%%
 #
 # all = []
@@ -69,7 +71,7 @@ def scrape_arxiv_data(graph, wait: int = 3, start_at: int = 0, write_thresh: int
 # for entry in all:
 #     id = all
 
-#%%
+# %%
 
 
 def get_dates():
@@ -86,19 +88,20 @@ def get_dates():
             date = parse(spl[1])
             dates[id] = date
     return dates
-#%%
 
 
-g = citation_graph()
-dates = get_dates()
+# %%
 
 
-#%%
-for node in tqdm(g.nodes):
-    g.add_node(node, date=dates.get(node))
+# g = citation_graph()
+# dates = get_dates()
+#
+# # %%
+# for node in tqdm(g.nodes):
+#     g.add_node(node, date=dates.get(node))
 
 
-#%%
+# %%
 def get_cit_per_year(g, ppy=4):
     years = []
     date = g.nodes['9907233']['date']

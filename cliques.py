@@ -28,3 +28,7 @@ def clique_graph(g, c):
             if len(res.nodes[i]['nodes'].intersection(res.nodes[j]['nodes'])) > 0:
                 res.add_edge(i, j)
     return res
+
+
+G = citation_graph()
+print(get_cliques(G))

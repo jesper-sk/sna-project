@@ -1,7 +1,17 @@
-from hep_ph import citation_graph, to_arxiv
-from hep_ph import coauthorship_graph
+from hep_ph import citation_graph, to_arxiv, coauthorship_graph
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
+
+
+def histogram(name, bins, xlabel, counts):
+    fig = plt.figure()
+    plt.title('Histogram of ' + name)
+    plt.xlabel(xlabel)
+    plt.ylabel('Occurrence')
+    plt.hist(counts, bins=bins, rwidth=0.7, align='left')
+    plt.savefig('img/coath_' + name + '.png')
+    plt.show()
 
 #%%
 # Calculate the metrics and measures discussed:
@@ -13,7 +23,6 @@ import networkx as nx
 
 # Citations
 G = citation_graph()
-
 order = G.order()
 edges = G.number_of_edges()
 in_deg = G.in_degree()
@@ -21,7 +30,22 @@ out_deg = G.out_degree()
 in_deg_centr = nx.in_degree_centrality(G)
 out_deg_centr = nx.out_degree_centrality(G)
 clustering = nx.clustering(G)
+mean_clustering_coef = sum(clustering.values()) / len(clustering)
+print(mean_clustering_coef)
 density = nx.density(G)
+print(density)
+
+# Centralities
+G = coauthorship_graph()
+eigen = nx.eigenvector_centrality(G)
+print(min(eigen.values()), max(eigen.values()))
+th = 0
+values = list(filter(lambda val: val > th, eigen.values()))
+
+nr_bins = 200
+histogram('eigenvector centrality', nr_bins, 'Eigenvector centrality', values)
+
+# Components
 wccs = list(nx.weakly_connected_components(G))
 sccs = list(nx.strongly_connected_components(G))
 big_wcc = max(wccs, key=len)
@@ -29,12 +53,7 @@ big_scc = max(sccs, key=len)
 dens_big_wcc = nx.density(nx.subgraph(G, big_wcc))
 dens_big_scc = nx.density(nx.subgraph(G, big_scc))
 
-# Link to paper with the most cited papers
-node_id = max(out_deg_centr, key=out_deg_centr.get)
-print(node_id)
-print(to_arxiv("0" + str(node_id)))
-
-# Plot the number of citations towards each paper
+# Plot in- and out-degree
 counts_in_deg = {}
 for (_, degree) in in_deg:
     if degree in counts_in_deg:
@@ -42,16 +61,6 @@ for (_, degree) in in_deg:
     else:
         counts_in_deg[degree] = 1
 
-fig = plt.figure()
-plt.title('Histogram of the in-degree')
-plt.xlabel('Fraction of papers that cite a paper')
-plt.ylabel('Number of papers')
-# plt.hist(counts_in_deg, bins=40, rwidth=0.7)
-plt.hist(counts_in_deg, bins=40, rwidth=0.7, align='left')
-plt.savefig('img/hist_in_degree.png')
-plt.show()
-
-# Plot the number of citations towards each paper
 counts_out_deg = {}
 for (_, degree) in out_deg:
     if degree in counts_out_deg:
@@ -60,53 +69,50 @@ for (_, degree) in out_deg:
         counts_out_deg[degree] = 1
 
 fig = plt.figure()
-plt.title('Histogram of the out-degree')
-plt.xlabel('Fraction of papers that a paper cites')
+plt.title('Histogram of the in- and out-degrees')
+plt.xlabel('Degree')
 plt.ylabel('Number of papers')
-# plt.hist(counts_in_deg, bins=40, rwidth=0.7)
-plt.hist(counts_out_deg, bins=40, rwidth=0.7, align='left')
-plt.savefig('img/hist_out_degree.png')
+max_value = max(max(counts_in_deg.values()), max(counts_out_deg.values()))
+plt.hist(list(counts_in_deg.values()), bins=40, rwidth=0.5, align='left', label='In-degree', range=(0, max_value))
+plt.hist(list(counts_out_deg.values()), bins=40, rwidth=0.5, align='mid', label="Out-degree", range=(0, max_value))
+plt.legend()
+plt.savefig('img/hist_inout_degree.png')
 plt.show()
 
-# Plot the sizes of the strongly connected components
-sizes_sccs = {}
-for component in sccs:
-    size = len(component)
-    if size in sizes_sccs:
-        sizes_sccs[size] += 1
-    else:
-        sizes_sccs[size] = 1
-
+log_counts_in = {k: np.log(np.log(val)) for k, val in counts_in_deg.items()}
+log_counts_out = {k: np.log(np.log(val)) for k, val in counts_out_deg.items()}
 fig = plt.figure()
-plt.title('Histogram of the sizes of strongly connected components')
-plt.xlabel('The size of a strongly connected component')
-plt.ylabel('Number of components')
-plt.hist(sizes_sccs, bins=40, rwidth=0.7, align='left')
-plt.savefig('img/hist_sccs.png')
+plt.title('Histogram of the logarithmic in- and out-degrees')
+plt.xlabel('Degree')
+plt.ylabel('Log(Log(Number of papers))')
+max_value = max(max(log_counts_in.values()), max(log_counts_out.values()))
+plt.hist(list(log_counts_in.values()), bins=40, rwidth=0.5, align='left', label='In-degree', range=(0, max_value))
+plt.hist(list(log_counts_out.values()), bins=40, rwidth=0.5, align='mid', label="Out-degree", range=(0, max_value))
+plt.legend()
+plt.savefig('img/hist_loglog_inout_degree.png')
 plt.show()
-
-
 
 # Coauthorship
-# G_coauthor = coauthorship_graph()
-#
-# order = G_coauthor.order()
-# edges = G_coauthor.number_of_edges()
-# deg = G_coauthor.degree()
-#
-# counts_ccs = {}
-# for (_, degree) in deg:
-#     if degree in counts_ccs:
-#         counts_ccs[degree] += 1
-#     else:
-#         counts_ccs[degree] = 1
-#
-# fig = plt.figure()
-# plt.title('Histogram of the number of coauthors per author')
-# plt.xlabel('Number of coauthors')
-# plt.ylabel('Number of nodes')
-# plt.hist(counts_ccs, bins=40)
-# plt.show()
-#
-# ccs = nx.connected_components(G_coauthor)
-# print(order, edges, deg, ccs)
+G_coauthor = coauthorship_graph()
+
+order = G_coauthor.order()
+edges = G_coauthor.number_of_edges()
+deg = G_coauthor.degree()
+
+counts_ccs = {}
+for (_, degree) in deg:
+    if degree in counts_ccs:
+        counts_ccs[degree] += 1
+    else:
+        counts_ccs[degree] = 1
+
+fig = plt.figure()
+plt.title('Histogram of the logarithmic number of coauthors per author')
+plt.xlabel('Number of coauthors')
+plt.ylabel('Log(Number of authors)')
+plt.hist(counts_ccs.values(), bins=40, rwidth=0.7, log=True)
+plt.savefig('img/hist_log_degree.png')
+plt.show()
+
+ccs = nx.connected_components(G_coauthor)
+print(order, edges, deg, ccs)
