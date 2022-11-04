@@ -4,12 +4,12 @@ import networkx as nx
 import numpy as np
 
 
-def histogram(name, bins, xlabel, counts):
+def histogram(name, bins, xlabel, counts, ylabel='Occurrence', log=False):
     fig = plt.figure()
     plt.title('Histogram of ' + name)
     plt.xlabel(xlabel)
-    plt.ylabel('Occurrence')
-    plt.hist(counts, bins=bins, rwidth=0.7, align='left')
+    plt.ylabel(ylabel)
+    plt.hist(counts, bins=bins, rwidth=0.7, align='left', log=log)
     plt.savefig('img/coath_' + name + '.png')
     plt.show()
 
@@ -34,16 +34,6 @@ mean_clustering_coef = sum(clustering.values()) / len(clustering)
 print(mean_clustering_coef)
 density = nx.density(G)
 print(density)
-
-# Centralities
-G = coauthorship_graph()
-eigen = nx.eigenvector_centrality(G)
-print(min(eigen.values()), max(eigen.values()))
-th = 0
-values = list(filter(lambda val: val > th, eigen.values()))
-
-nr_bins = 200
-histogram('eigenvector centrality', nr_bins, 'Eigenvector centrality', values)
 
 # Components
 wccs = list(nx.weakly_connected_components(G))
@@ -92,6 +82,7 @@ plt.legend()
 plt.savefig('img/hist_loglog_inout_degree.png')
 plt.show()
 
+################################################
 # Coauthorship
 G_coauthor = coauthorship_graph()
 
@@ -99,12 +90,21 @@ order = G_coauthor.order()
 edges = G_coauthor.number_of_edges()
 deg = G_coauthor.degree()
 
+# Degree centralities
 counts_ccs = {}
 for (_, degree) in deg:
     if degree in counts_ccs:
         counts_ccs[degree] += 1
     else:
         counts_ccs[degree] = 1
+
+fig = plt.figure()
+plt.title('Histogram of the number of coauthors per author')
+plt.xlabel('Number of coauthors')
+plt.ylabel('Number of authors')
+plt.hist(counts_ccs.values(), bins=40, rwidth=0.7)
+plt.savefig('img/hist_degree.png')
+plt.show()
 
 fig = plt.figure()
 plt.title('Histogram of the logarithmic number of coauthors per author')
@@ -114,5 +114,16 @@ plt.hist(counts_ccs.values(), bins=40, rwidth=0.7, log=True)
 plt.savefig('img/hist_log_degree.png')
 plt.show()
 
-ccs = nx.connected_components(G_coauthor)
-print(order, edges, deg, ccs)
+# Eigenvector centralities
+eigen = nx.eigenvector_centrality(G_coauthor)
+print(min(eigen.values()), max(eigen.values()))
+th = 0
+values = list(filter(lambda val: val > th, eigen.values()))
+
+nr_bins = 200
+histogram('logarithmic eigenvector centrality',
+          nr_bins,
+          'Eigenvector centrality',
+          values,
+          ylabel="Log(Occurrence)",
+          log=True)
