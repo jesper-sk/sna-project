@@ -86,6 +86,57 @@ plt.show()
 # Coauthorship
 G_coauthor = coauthorship_graph()
 
+# Components
+wccs = list(nx.weakly_connected_components(G))
+sccs = list(nx.strongly_connected_components(G))
+big_wcc = max(wccs, key=len)
+big_scc = max(sccs, key=len)
+dens_big_wcc = nx.density(nx.subgraph(G, big_wcc))
+dens_big_scc = nx.density(nx.subgraph(G, big_scc))
+
+# Plot in- and out-degree
+counts_in_deg = {}
+for (_, degree) in in_deg:
+    if degree in counts_in_deg:
+        counts_in_deg[degree] += 1
+    else:
+        counts_in_deg[degree] = 1
+
+counts_out_deg = {}
+for (_, degree) in out_deg:
+    if degree in counts_out_deg:
+        counts_out_deg[degree] += 1
+    else:
+        counts_out_deg[degree] = 1
+
+fig = plt.figure()
+plt.title('Histogram of the in- and out-degrees')
+plt.xlabel('Degree')
+plt.ylabel('Number of papers')
+max_value = max(max(counts_in_deg.values()), max(counts_out_deg.values()))
+plt.hist(list(counts_in_deg.values()), bins=40, rwidth=0.5, align='left', label='In-degree', range=(0, max_value))
+plt.hist(list(counts_out_deg.values()), bins=40, rwidth=0.5, align='mid', label="Out-degree", range=(0, max_value))
+plt.legend()
+plt.savefig('img/hist_inout_degree.png')
+plt.show()
+
+log_counts_in = {k: np.log(np.log(val)) for k, val in counts_in_deg.items()}
+log_counts_out = {k: np.log(np.log(val)) for k, val in counts_out_deg.items()}
+fig = plt.figure()
+plt.title('Histogram of the logarithmic in- and out-degrees')
+plt.xlabel('Degree')
+plt.ylabel('Log(Log(Number of papers))')
+max_value = max(max(log_counts_in.values()), max(log_counts_out.values()))
+plt.hist(list(log_counts_in.values()), bins=40, rwidth=0.5, align='left', label='In-degree', range=(0, max_value))
+plt.hist(list(log_counts_out.values()), bins=40, rwidth=0.5, align='mid', label="Out-degree", range=(0, max_value))
+plt.legend()
+plt.savefig('img/hist_loglog_inout_degree.png')
+plt.show()
+
+################################################
+# Coauthorship
+G_coauthor = coauthorship_graph()
+
 order = G_coauthor.order()
 edges = G_coauthor.number_of_edges()
 deg = G_coauthor.degree()
